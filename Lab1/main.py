@@ -3,6 +3,7 @@ from Cup import Cup
 from Belt import Belt
 import datetime
 
+
 def file_to_products_list(filename):
     products = []
     

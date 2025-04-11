@@ -1,5 +1,4 @@
 from Product import Product
-import datetime
 
 class Cup(Product):
 
