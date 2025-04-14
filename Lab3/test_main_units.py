@@ -20,6 +20,17 @@ from main import (
 
 app = QApplication(sys.argv)
 
+class TestChildClasses(unittest.TestCase):
+    def setUp(self):
+        self.sample_belt = Belt(datetime.datetime(2023, 1, 1), "Belt", 10, True)
+        self.sample_cake = Cake(datetime.datetime(2023, 1, 1), "Cake", 5, 15)
+        self.sample_cup = Cup(datetime.datetime(2023, 1, 1), "Cup", 20, 250)
+    
+    def test_product_as_string(self):
+        self.assertEqual(str(self.sample_belt), "Belt(01.01.2023, \"Belt\", 10, True)")
+        self.assertEqual(str(self.sample_cake), "Cake(01.01.2023, \"Cake\", 5, 15)")
+        self.assertEqual(str(self.sample_cup), "Cup(01.01.2023, \"Cup\", 20, 250)")
+
 class TestProductManager(unittest.TestCase):
     def setUp(self):
         self.manager = ProductManager()

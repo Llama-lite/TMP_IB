@@ -64,7 +64,6 @@ class ProductTableModel(QAbstractTableModel):
         return None
 
 class ProductFormManager:
-    """Manages the dynamic form fields for different product types"""
     def __init__(self, special_layout):
         self.special_layout = special_layout
         self.special_fields = []
