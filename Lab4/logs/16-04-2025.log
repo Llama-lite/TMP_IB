@@ -1,0 +1,18 @@
+16-04-2025 20:27:47 WARNING Tried to add empty named product
+16-04-2025 20:27:50 WARNING Tried to add empty named product
+16-04-2025 20:27:58 ERROR Failed to load file: not enough values to unpack (expected 2, got 1)
+16-04-2025 20:28:01 WARNING Tried to add empty named product
+16-04-2025 20:29:20 WARNING Tried remove object from table without selecting any
+16-04-2025 23:40:07 ERROR Failed processing line 11: REM special = 15. Error: Unsupported REM condition: special = 15
+16-04-2025 23:40:07 ERROR Failed to process command file: Unsupported REM condition: special = 15
+16-04-2025 23:40:51 ERROR Failed processing line 11: REM special = 15. Error: Unsupported REM condition: special = 15
+16-04-2025 23:40:51 ERROR Failed to process command file: Unsupported REM condition: special = 15
+16-04-2025 23:43:07 ERROR Failed processing line 11: REM special = 15. Error: Unsupported REM condition: special = 15
+16-04-2025 23:43:07 ERROR Failed to process command file: Unsupported REM condition: special = 15
+16-04-2025 23:47:13 ERROR Failed processing line 1: ADD Cake; 01.01.2028; Test cake; 10; 20. Error: name 'i' is not defined
+16-04-2025 23:47:13 ERROR Failed to process command file: name 'i' is not defined
+16-04-2025 23:47:33 ERROR Failed processing line 15: REM 100 <= special <= 300. Error: Incorrect special field value. Only dates and integers are supported: 100, 300
+16-04-2025 23:47:33 ERROR Failed to process command file: Incorrect special field value. Only dates and integers are supported: 100, 300
+16-04-2025 23:49:34 WARNING Tried to add empty named product
+16-04-2025 23:49:36 ERROR Failed processing line 15: REM 100 <= special <= 300. Error: Incorrect special field value. Only dates and integers are supported: 100, 300
+16-04-2025 23:49:36 ERROR Failed to process command file: Incorrect special field value. Only dates and integers are supported: 100, 300

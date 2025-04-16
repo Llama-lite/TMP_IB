@@ -1,0 +1,5 @@
+Cake(01.01.2028, "Test cake", 10, 20)
+Belt(01.01.2028, "Test belt", 20, True)
+Cup(01.01.2028, "Test cup 1", 30, 250)
+Cup(01.01.2028, "Test cup 2", 99, 250)
+Cup(01.01.2028, "Test cup 3", 301, 250)
