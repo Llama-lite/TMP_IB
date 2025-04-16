@@ -1,0 +1,5 @@
+16-04-2025 20:27:47 WARNING Tried to add empty named product
+16-04-2025 20:27:50 WARNING Tried to add empty named product
+16-04-2025 20:27:58 ERROR Failed to load file: not enough values to unpack (expected 2, got 1)
+16-04-2025 20:28:01 WARNING Tried to add empty named product
+16-04-2025 20:29:20 WARNING Tried remove object from table without selecting any

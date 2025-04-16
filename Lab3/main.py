@@ -2,53 +2,119 @@ import sys
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QTableView, QPushButton, QLineEdit, QDateEdit, QSpinBox,
                              QLabel, QMessageBox, QFileDialog, QComboBox)
-from PyQt6.QtCore import QDate, Qt, QAbstractTableModel
+from PyQt6.QtCore import QDate, Qt, QAbstractTableModel, QModelIndex
 from Cake import Cake
 from Cup import Cup
 from Belt import Belt
+from Product import Product
 import datetime
 
-class ProductManager:
+import os.path
+
+class Logger:
+    """Manages Exception logging"""
+    
     def __init__(self):
+        """Initialize a folder for logs"""
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
+        
+    def log_message(self, level: str, message: str, filename = f"{datetime.datetime.now().strftime("%d-%m-%Y")}.log") -> None:
+        """
+        Log message to a file
+        
+        Args:
+            level (str): DEBUG, ERROR, WARNING...
+            message (str): Message to log
+            filename (str): Name for log file (currant date as default)
+        """
+        if not os.path.exists(f"logs/{filename}"):
+            with open(f"logs/{filename}", "w") as file:
+                file.write(f"{datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")} {level} {message}\n")
+        else:
+            with open(f"logs/{filename}", "a") as file:
+                file.write(f"{datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")} {level} {message}\n")
+
+    
+class ProductManager:
+    """Manages a collection of products"""
+    
+    def __init__(self):
+        """Initialize an empty product list"""
         self.products = []
     
-    def add_product(self, product):
+    def add_product(self, product: Product) -> None:
+        """
+        Add a product to the manager
+        
+        Args:
+            product (Product): Product to add
+        """
         self.products.append(product)
     
-    def delete_product(self, index):
+    def delete_product(self, index: int) -> None:
+        """
+        Delete a product at the specified index
+        
+        Args:
+            index (int): Product position
+        """
         if 0 <= index < len(self.products):
             del self.products[index]
     
-    def clear_products(self):
+    def clear_products(self) -> None:
+        """Remove all products from list"""
         self.products = []
     
-    def get_products(self):
+    def get_products(self) -> list[Product]:
+        """Get a copy of product list"""
         return self.products.copy()
 
 class ProductTableModel(QAbstractTableModel):
-    def __init__(self, product_manager, parent=None):
+    """Qt model for displaying products in a table view"""
+    
+    def __init__(self, product_manager: ProductManager, parent=None):
+        """
+        Initialize the table model
+        
+        Args:
+            product_manager (ProductManager): Manager containing products to display
+            parent: Parent QObject
+        """
         super().__init__(parent)
         self.product_manager = product_manager
         self.headers = ["Supply Date", "Name", "Amount", "Special Attribute"]
     
-    def columnCount(self, parent=None):
+    def columnCount(self, parent=None) -> int:
+        """Get number of columns"""
         return len(self.headers)
     
-    def rowCount(self, parent=None):
-        return len(self.product_manager.products)
+    def rowCount(self, parent=None) -> int:
+        """Get number of rows"""
+        return len(self.product_manager.get_products())
     
-    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole) -> str|None:
+        """
+        Get data of the selected row for display
+        
+        Args:
+            index (QModelIndex): Selected model index
+            role (Qt.ItemDataRole): Role of QStandartItem
+        
+        Returns:
+            str|None: Selected field as string or None
+        """
         if not index.isValid() or role != Qt.ItemDataRole.DisplayRole:
             return None
         
-        product = self.product_manager.products[index.row()]
+        product = self.product_manager.get_products()[index.row()]
         
         if index.column() == 0:
             return str(product.supplyDate)
         elif index.column() == 1:
             return product.name
         elif index.column() == 2:
-            return str(product.ammount)
+            return str(product.amount)
         elif index.column() == 3:
             if isinstance(product, Belt):
                 return str(product.metal)
@@ -58,18 +124,41 @@ class ProductTableModel(QAbstractTableModel):
                 return str(product.volume)
         return None
     
-    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+    def headerData(self, section: int, orientation: Qt.Orientation, role=Qt.ItemDataRole.DisplayRole) -> str|None:
+        """
+        Get header data
+        
+        Args:
+            section (int): Selected model section
+            orientation (Qt.Orientation): Table orientation (Vertical|Horizontal)
+        
+        Returns:
+            str|None: Selected header as string or None
+        """
         if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
             return self.headers[section]
         return None
 
 class ProductFormManager:
-    def __init__(self, special_layout):
+    """Manages dynamic form fields for different product types"""
+    
+    def __init__(self, special_layout: QHBoxLayout):
+        """
+        Initialize the special fields form manager
+        
+        Args:
+            special_layout (QHBoxLayout): Layout to add special fields to
+        """
         self.special_layout = special_layout
         self.special_fields = []
     
-    def update_form_fields(self, product_type):
-        # Clear existing fields
+    def update_form_fields(self, product_type: str) -> None:
+        """
+        Update form fields based on product type
+        
+        Args:
+            product_type (str): Name of product type (Ex: Belt, Cake, Cup...)
+        """
         self.clear_fields()
         
         if product_type == "Belt":
@@ -79,14 +168,16 @@ class ProductFormManager:
         elif product_type == "Cup":
             self.create_cup_fields()
     
-    def clear_fields(self):
+    def clear_fields(self) -> None:
+        """Clear all special fields items and containers"""
         for i in range(self.special_layout.count()):
             for j in range(self.special_layout.itemAt(i).layout().count()):
                 self.special_layout.itemAt(i).layout().itemAt(j).widget().deleteLater()
             self.special_layout.itemAt(i).layout().deleteLater()
         self.special_fields = []
     
-    def create_belt_fields(self):
+    def create_belt_fields(self) -> None:
+        """Create fields specific to Belt products"""
         metal_layout = QVBoxLayout()
         metal_layout.addWidget(QLabel("Metal?"))
         metal_select = QComboBox()
@@ -95,7 +186,8 @@ class ProductFormManager:
         self.special_layout.addLayout(metal_layout)
         self.special_fields = [metal_select]
     
-    def create_cake_fields(self):
+    def create_cake_fields(self) -> None:
+        """Create fields specific to Cake products"""
         cake_layout = QVBoxLayout()
         cake_layout.addWidget(QLabel("Height"))
         cake_height = QSpinBox()
@@ -105,7 +197,8 @@ class ProductFormManager:
         self.special_layout.addLayout(cake_layout)
         self.special_fields = [cake_height]
     
-    def create_cup_fields(self):
+    def create_cup_fields(self) -> None:
+        """Create fields specific to Cup products"""
         cup_layout = QVBoxLayout()
         cup_layout.addWidget(QLabel("Volume"))
         cup_volume = QSpinBox()
@@ -115,7 +208,13 @@ class ProductFormManager:
         self.special_layout.addLayout(cup_layout)
         self.special_fields = [cup_volume]
     
-    def get_special_field_value(self):
+    def get_special_field_value(self) -> bool|int|None:
+        """
+        Get the value from the special field
+        
+        Returns:
+            bool|int|None: Special field value or None
+        """
         if self.special_fields:
             if isinstance(self.special_fields[0], QComboBox):
                 return bool(self.special_fields[0].currentText())
@@ -124,14 +223,32 @@ class ProductFormManager:
         return None
 
 class ProductFileHandler:
+    """Handles saving and loading products to/from files"""
+    
     @staticmethod
-    def save_products(products, filename):
+    def save_products(products: list[Product], filename: str) -> None:
+        """
+        Save products to a file
+        
+        Args:
+            products (list[Product]): List of products
+            filename (str): Path to file
+        """
         with open(filename, 'w') as file:
             for product in products:
                 file.write(str(product)+"\n")
     
     @staticmethod
-    def load_products(filename):
+    def load_products(filename: str) -> list[Product]:
+        """
+        Load products from a file
+        
+        Args:
+            filename (str): Path to file
+            
+        Returns:
+            List[Product]: List of products
+        """
         products = []
         with open(filename, 'r') as file:
             for line in file:
@@ -142,27 +259,30 @@ class ProductFileHandler:
                     products.append(Belt(
                         supplyDate=datetime.datetime.strptime(values[0], "%d.%m.%Y"),
                         name=values[1][1:-1],
-                        ammount=int(values[2]),
+                        amount=int(values[2]),
                         metal=(values[3].lower() == "true")
                     ))
                 elif supply_type == "Cake":
                     products.append(Cake(
                         supplyDate=datetime.datetime.strptime(values[0], "%d.%m.%Y"),
                         name=values[1][1:-1],
-                        ammount=int(values[2]),
+                        amount=int(values[2]),
                         height=int(values[3])
                     ))
                 elif supply_type == "Cup":
                     products.append(Cup(
                         supplyDate=datetime.datetime.strptime(values[0], "%d.%m.%Y"),
                         name=values[1][1:-1],
-                        ammount=int(values[2]),
+                        amount=int(values[2]),
                         volume=int(values[3])
                     ))
         return products
 
 class ProductWindow(QMainWindow):
+    """Main application window for product management"""
+    
     def __init__(self):
+        """Initialize the main window"""
         super().__init__()
         self.setWindowTitle("Product supply")
         self.setGeometry(100, 100, 800, 600)
@@ -170,11 +290,13 @@ class ProductWindow(QMainWindow):
         # Initialize components
         self.product_manager = ProductManager()
         self.file_handler = ProductFileHandler()
+        self.logger = Logger()
         
         # Create UI
         self.init_ui()
     
-    def init_ui(self):
+    def init_ui(self) -> None:
+        """Initialize the user interface"""
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
@@ -255,13 +377,16 @@ class ProductWindow(QMainWindow):
         
         layout.addLayout(button_layout)
     
-    def on_type_changed(self):
+    def on_type_changed(self) -> None:
+        """Handle product type selection change"""
         self.form_manager.update_form_fields(self.type_select.currentText())
     
-    def add_product(self):
+    def add_product(self) -> None:
+        """Add a new product based on form data"""
         name = self.name_edit.text().strip()
         if not name:
             QMessageBox.warning(self, "Warning", "Product name cannot be empty!")
+            self.logger.log_message("WARNING", "Tried to add empty named product")
             return
         
         supply_date = datetime.datetime.combine(
@@ -282,10 +407,12 @@ class ProductWindow(QMainWindow):
         self.product_manager.add_product(product)
         self.table_model.layoutChanged.emit()
     
-    def delete_product(self):
+    def delete_product(self) -> None:
+        """Deletes selected product"""
         selected = self.table_view.currentIndex()
         if not selected.isValid():
             QMessageBox.warning(self, "Warning", "Please select a product to delete!")
+            self.logger.log_message("WARNING", "Tried remove object from table without selecting any")
             return
         
         reply = QMessageBox.question(
@@ -298,7 +425,8 @@ class ProductWindow(QMainWindow):
             self.product_manager.delete_product(selected.row())
             self.table_model.layoutChanged.emit()
     
-    def save_products(self):
+    def save_products(self) -> None:
+        """Save products to file"""
         filename, _ = QFileDialog.getSaveFileName(
             None, "Save File", ".", "Text Files (*.txt);;All Files (*)"
         )
@@ -308,7 +436,8 @@ class ProductWindow(QMainWindow):
                 filename
             )
     
-    def load_products(self):
+    def load_products(self) -> None:
+        """Load products from a file"""
         filename, _ = QFileDialog.getOpenFileName(
             None, "Open File", ".", "Text Files (*.txt);;All Files (*)"
         )
@@ -322,6 +451,7 @@ class ProductWindow(QMainWindow):
                 QMessageBox.information(self, "Success", "Data loaded successfully!")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load file: {str(e)}")
+                self.logger.log_message("ERROR", f"Failed to load file: {str(e)}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

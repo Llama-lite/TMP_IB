@@ -1,25 +1,35 @@
-class Product:
+from datetime import datetime
 
-    def __init__(self, supplyDate, name, ammount):
+class Product:
+    """Base class for all product types"""
+    
+    def __init__(self, supplyDate, name, amount):
+        """Initialize a Product
+        
+        Args:
+            supplyDate (datetime): Date when product will be supplied
+            name (str): Name of the product
+            amount (int): Amount of the product
+        """
         self.__supplyDate = supplyDate
         self.__name = name
-        self.__ammount = ammount
+        self.__amount = amount
     
     @property
-    def date(self):
-        return self.__name
-    
-    @property
-    def name(self):
+    def name(self) -> str:
+        """Get the product name"""
         return self.__name
 
     @property
-    def supplyDate(self):
+    def supplyDate(self) -> datetime:
+        """Get the product supplyDate"""
         return self.__supplyDate
 
     @property
-    def ammount(self):
-        return self.__ammount
+    def amount(self) -> int:
+        """Get the product amount"""
+        return self.__amount
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """String representation of the product (Should be implemented by subclasses)"""
         raise NotImplementedError()

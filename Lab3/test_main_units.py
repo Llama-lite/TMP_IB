@@ -20,7 +20,7 @@ from main import (
 
 app = QApplication(sys.argv)
 
-class TestChildClasses(unittest.TestCase):
+class TestProducts(unittest.TestCase):
     def setUp(self):
         self.sample_belt = Belt(datetime.datetime(2023, 1, 1), "Belt", 10, True)
         self.sample_cake = Cake(datetime.datetime(2023, 1, 1), "Cake", 5, 15)
