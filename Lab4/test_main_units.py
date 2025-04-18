@@ -15,7 +15,9 @@ from main import (
     ProductTableModel,
     ProductFormManager,
     ProductFileHandler,
-    ProductWindow
+    ProductWindow,
+    CommandProcessor,
+    Logger
 )
 
 app = QApplication(sys.argv)
@@ -211,6 +213,7 @@ class TestProductWindow(unittest.TestCase):
     def test_load_products_failure(self, mock_critical, mock_dialog, mock_load):
         self.window.load_products()
         mock_critical.assert_called_once()
-
+        
+        
 if __name__ == '__main__':
     unittest.main()
